@@ -1,0 +1,55 @@
+##########################################EDA#################################################
+# Import packages
+import pandas as pd
+import numpy as np
+
+# Load dataset into dataframe
+data = pd.read_csv("tiktok_dataset.csv")
+
+data.head(10)
+data.info()
+data.describe()
+
+# What are the different values for claim status and how many of each are in the data?
+claimstatus_cnt = data.groupby('claim_status').size()
+print(claimstatus_cnt)
+
+# What is the average view count of videos with "claim" status?
+claim = data['claim_status'] == 'claim'
+cnt_claim = data[claim]['video_view_count'].mean()
+print('Mean view count claims:',cnt_claim)
+
+# What is the average view count of videos with "opinion" status?
+opinion = data['claim_status'] == 'opinion'
+cnt_opinion = data[opinion]['video_view_count'].mean()
+print('Median view count claims:',cnt_opinion)
+
+# Get counts for each group combination of claim status and author ban status
+data.groupby(['claim_status', 'author_ban_status']).count()[['#']]
+
+auth_ban_stat = data.groupby(['author_ban_status']).median(numeric_only=True)[
+    ['video_share_count']]
+# What's the median video share count of each author ban status?
+auth_ban_stat
+
+# In depth Analysis on Author ban status
+agg_video_stat = data.groupby('author_ban_status').agg({'video_view_count': ['mean', 'median'],
+                                                                'video_like_count': ['mean', 'median'],
+                                                                'video_share_count': ['mean', 'median']})
+agg_video_stat
+
+# Create a likes_per_view column
+data['likes_per_view'] = data['video_like_count'] / data['video_view_count'] 
+
+# Create a comments_per_view column
+data['comments_per_view'] = data['video_comment_count'] / data['video_view_count']
+
+# Create a shares_per_view column
+data['shares_per_view'] = data['video_share_count'] / data['video_view_count']
+
+agg_perview_stat = data.groupby(['claim_status', 'author_ban_status']).agg({'likes_per_view': ['mean', 'median'],
+                                                                'comments_per_view': ['mean', 'median'],
+                                                                'shares_per_view': ['mean', 'median']})
+agg_perview_stat
+
+#############################################################################################################
